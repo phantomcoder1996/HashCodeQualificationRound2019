@@ -1,6 +1,6 @@
 import numpy as np
 import argparse
-
+import time
 
 
 
@@ -16,6 +16,18 @@ class slide(object):
     def get_num_tags(self):
         return len(self.tags)
 
+def find_union(arr1,arr2):
+    s = {}
+    for elem in arr1:
+        if not s.get(elem):
+            s[elem]=1
+    for elem in arr2:
+        if not s.get(elem):
+            s[elem]=1
+    
+    return s.keys()
+
+
 
 def convert_vertical_to_horizontal(vs):
 
@@ -25,6 +37,7 @@ def convert_vertical_to_horizontal(vs):
     new_id = 0
 
     for photo1 in vs:
+        t = time.time()
         if not is_selected[photo1.id]:
             best_comb = None
             best_comb_phs = None
@@ -33,9 +46,10 @@ def convert_vertical_to_horizontal(vs):
             # find the photo that maximizes the combined number of tags in two photos
             for photo2 in vs:
                 if photo2.id != photo1.id and not is_selected[photo2.id]:
-                    x = np.union1d(photo1.tags,photo2.tags)
-                    if  x.shape[0] > num_tags:
-                        num_tags = x.shape[0]
+                    x = find_union(photo1.tags,photo2.tags)
+                    l = len(x)
+                    if  l > num_tags:
+                        num_tags = l
                         best_comb = x
                         best_comb_phs = (photo1,photo2)
                         sol_exists = True
@@ -46,6 +60,8 @@ def convert_vertical_to_horizontal(vs):
                 is_selected[p2.id] = True
                 horizontal_photos.append(slide(new_id,best_comb,"H"))
                 new_id += 1
+        t2 = time.time()
+        print(t2-t)
     
     return horizontal_photos
 
